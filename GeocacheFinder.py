@@ -9,7 +9,7 @@ import unicodedata
 import time
 import gps
 
-def bearing(start, target):
+def calculateBearing(start, target):
   lat1, lon1 = map(math.radians, start)
   lat2, lon2 = map(math.radians, target)
   dLon = lon2-lon1
@@ -29,14 +29,17 @@ def humanizeBearing(bearing):
         return symbols[i]
 
 class CacheDatabase:
-  def __init__(self, dbfile):
+  def __init__(self, dbfile, searchRadius, closeRadius, bearingError):
     self.__conn = db.connect(dbfile)
+    self.__searchRadius = searchRadius
+    self.__closeRadius = closeRadius
+    self.__bearingError = bearingError
   
-  def findNearest(self, lat, lon):
+  def findNearest(self, lat, lon, bearing):
     cur = self.__conn.cursor()
 
     # SQL to define a circle around the home point with a given radius
-    radius = 3000.0 / 111319 #3km
+    radius = self.__searchRadius / 111319.0
     circle = 'BuildCircleMbr(%f, %f, %f)' % (lat, lon, radius)
 
     # SQL to calculate distance between geocache and home point
@@ -53,14 +56,23 @@ class CacheDatabase:
         'code': row[0],
         'description': row[1],
         'distance': int(row[4]),
-        'human_bearing': humanizeBearing(bearing(coord, (lat, lon))), 
-        'bearing': bearing(coord, (lat, lon)),
+        'human_bearing': humanizeBearing(calculateBearing(coord, (lat, lon))), 
+        'bearing': calculateBearing(coord, (lat, lon)),
         'lat': row[2],
         'lon': row[3]
         })
 
-    if len(data) > 0:
-      return data[0]
+    if len(data) == 0: return None
+
+    if data[0]['distance'] < self.__closeRadius:
+      return data[0] 
+
+    for row in data:
+      minBearing = (bearing - self.__bearingError) % 360
+      maxBearing = (bearing + self.__bearingError) % 360
+      if row['bearing'] >= minBearing and row['bearing'] <= maxBearing:
+        return row
+
     return None
 
 def main(db):
@@ -84,19 +96,21 @@ def main(db):
   title = s.add_scroller_widget("title",1,1,16,1,"h",1,"" )
   code = s.add_string_widget("code", "", y=2)
   dist = s.add_string_widget("dist", "", y=2, x=9)
-  bearing = s.add_string_widget("bearing", "", y=2, x=14)
+  bearing_widget = s.add_string_widget("bearing", "", y=2, x=14)
 
   lat, lon = (0,0)
+  bearing = 0
 
   while 1:
     gpsinfo = gps_session.next()
+    if 'track' in gpsinfo.keys():
+      bearing = gpsinfo.track
     if 'lat' in gpsinfo.keys() and 'lon' in gpsinfo.keys():
       lat = gpsinfo.lat
       lon = gpsinfo.lon
       lat_widget.set_text("lat: %0.6f" % lat)
       lon_widget.set_text("lon: %0.6f" % lon)
-      print lat,lon
-    closest = db.findNearest(lat, lon)
+    closest = db.findNearest(lat, lon, bearing)
     if closest:
       print closest
       s.set_priority("info")
@@ -107,13 +121,16 @@ def main(db):
       else:
         dist.set_text('%0.0fm' % closest['distance'])
       if closest['distance'] < 200:
-        s.set_backlight("flash")
-      bearing.set_text(closest['human_bearing'])
+        s.set_backlight("blink")
+      else:
+        s.set_backlight("on")
+      bearing_widget.set_text(closest['human_bearing'])
     else:
       s.set_priority("hidden")
+    time.sleep(10)
 
 if __name__=='__main__':
-  db = CacheDatabase('db.sqlite')
+  db = CacheDatabase('db.sqlite', 3000, 500, 10)
   main(db)
 
     

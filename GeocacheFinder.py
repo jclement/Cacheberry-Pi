@@ -58,7 +58,7 @@ class CacheDatabase:
         'distance_db': int(row[4]),
         # I more reliable (I think) distance calcs from this function
         # rather than the database
-        'distance': 1000.8 * gislib.getDistance(coord, (lat, lon)),
+        'distance': int(1000.0 * gislib.getDistance(coord, (lat, lon))),
         'human_bearing': humanizeBearing(calculateBearing(coord, (lat, lon))), 
         'bearing': calculateBearing(coord, (lat, lon)),
         'lat': row[2],
@@ -93,7 +93,7 @@ class CacheDatabase:
     return None
 
 def main(db):
- 
+  print "GeocacheFinder Starting..." 
   gps_session = gps.gps(mode=gps.WATCH_ENABLE)
 
   lcd = Server()
@@ -123,13 +123,18 @@ def main(db):
     while gps_session.waiting():
       gpsinfo = gps_session.next()
       if gpsinfo["class"] == 'TPV':
-        bearing = gpsinfo.track
-        lat = gpsinfo.lat
-        lon = gpsinfo.lon
-        speed = gpsinfo.speed
+        if 'track' in gpsinfo.keys():
+          bearing = gpsinfo.track
+        if 'lat' in gpsinfo.keys():
+          lat = gpsinfo.lat
+        if 'lon' in gpsinfo.keys():
+          lon = gpsinfo.lon
+        if 'speed' in gpsinfo.keys():
+          speed = gpsinfo.speed
         lat_widget.set_text("lat: %0.6f" % lat)
         lon_widget.set_text("lon: %0.6f" % lon)
-        print gpsinfo['time'], bearing, lat, lon, speed
+        if 'time' in gpsinfo.keys():
+          print gpsinfo['time'], bearing, lat, lon, speed
 
     # find closest cache based on lat, lon, and bearing/speed
     closest = db.findNearest(lat, lon, bearing, speed)

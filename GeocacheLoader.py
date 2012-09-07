@@ -2,12 +2,15 @@
 
 # ====================================================================
 DBFILE = 'db.sqlite'
-SOURCE_URL = 'https://dl.dropbox.com/u/120688/gsak/nav.csv'
+#SOURCE_URL = 'https://dl.dropbox.com/u/120688/gsak/nav.csv'
+SOURCE_URL = '/var/autofs/removable/sda1/cacheberrypi/nav.csv'
 # ====================================================================
 
 import os
 import sys
 import urllib
+import time
+from lcdproc.server import Server
 from pyspatialite import dbapi2 as db
 
 class GeocacheLoader:
@@ -49,15 +52,17 @@ class GeocacheLoader:
       msg = "> SQLite v%s Spatialite v%s" % (row[0], row[1])
       print msg
 
-  def refresh(self):
+  def refresh(self, progressFunc):
     print "Refreshing"
     f = urllib.urlopen(self.__url)
     f.readline()
     cur = self.__db.cursor()
     count=0
     cur.execute("delete from gc")
-    for line in f.readlines():
+    lines = f.readlines()
+    for line in lines:
       count+=1
+      progressFunc((float(count)/len(lines)) * 5*16)
       Name,Latitude,Longitude,Description,URL,Type,Container,Diff,Terr = line.split('\t')
       geom = "GeomFromText('POINT(%f,%f)')" % (float(Latitude), float(Longitude))
       geom = "MakePoint(%f,%f, 4326)" % (float(Latitude), float(Longitude))
@@ -69,5 +74,16 @@ class GeocacheLoader:
 
 
 if __name__=='__main__':
-  GeocacheLoader(DBFILE, SOURCE_URL).refresh()
+  while 1:
+    if os.path.exists(SOURCE_URL):
+      lcd = Server()
+      lcd.start_session()
+      s = lcd.add_screen("Loader")
+      s.set_priority("alert")
+      title = s.add_string_widget("title", "Updating...")
+      status = s.add_hbar_widget("status",x=1,y=2,length=0)
+      GeocacheLoader(DBFILE, SOURCE_URL).refresh(lambda x: status.set_length(x))
+      time.sleep(10)
+      sys.exit()
+    time.sleep(15)
 

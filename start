@@ -1,0 +1,7 @@
+#!/bin/bash
+
+sleep 30
+cd /home/jsc/code/Cacheberry-Pi
+python GeocacheFinder.py 2>> finder.err >> finder.log&
+sleep 2
+python GeocacheLoader.py 2>> loader.err >> loader.log&

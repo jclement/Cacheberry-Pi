@@ -39,7 +39,7 @@ class CacheDatabase:
     self.__searchRadius = searchRadius
     self.__closeRadius = closeRadius
     self.__bearingError = bearingError
-    self.__minSpeed = minSpeed
+    self.__minSpeed = minSpeed * 0.27778
   
   def findNearest(self, lat, lon, bearing, speed):
     cur = self.__conn.cursor()
@@ -157,7 +157,7 @@ def main(db):
       s.set_priority("hidden")
 
 if __name__=='__main__':
-  db = CacheDatabase('db.sqlite', 3500, 100, 10, 2)
+  db = CacheDatabase('db.sqlite', 3500, 100, 10, 10)
   main(db)
 
     

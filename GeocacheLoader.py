@@ -3,12 +3,15 @@
 # ====================================================================
 DBFILE = 'db.sqlite'
 SOURCE_URL = '/var/autofs/removable/sda1/cacheberrypi/nav.csv'
+TRACKS_PATH = '/var/autofs/removable/sda1/cacheberrypi/tracks/'
 # ====================================================================
 
 import os
 import sys
 import urllib
 import time
+import shutil
+import glob
 from lcdproc.server import Server
 from pyspatialite import dbapi2 as db
 
@@ -82,8 +85,17 @@ if __name__=='__main__':
       title = s.add_string_widget("title", "Updating...")
       status = s.add_hbar_widget("status",x=1,y=2,length=0)
       GeocacheLoader(DBFILE, SOURCE_URL).refresh(lambda x: status.set_length(x))
+      title.set_text("Moving Tracks...")
+      files = glob.glob("tracks/*.archived")
+      os.mkdir(TRACKS_PATH)
+      status.set_length(0)
+      cnt = 0
+      for file in files:
+        cnt += 1
+        shutil.move(file, TRACKS_PATH)
+        status.set_length(float(cnt)/len(files) * 5 * 16)
       title.set_text("Completed...")
-      time.sleep(15)
+      time.sleep(5)
       sys.exit()
     time.sleep(15)
 

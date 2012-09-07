@@ -1,0 +1,4 @@
+#!/bin/bash
+find tracks -type f -name "*.nmea" -exec mv {} {}.archived \;
+TRACKFILE=tracks/`cat /dev/urandom | tr -cd 'a-f0-9' | head -c 32`.nmea
+gpspipe -r -o $TRACKFILE

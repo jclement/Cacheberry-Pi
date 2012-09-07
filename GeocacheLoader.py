@@ -2,7 +2,6 @@
 
 # ====================================================================
 DBFILE = 'db.sqlite'
-#SOURCE_URL = 'https://dl.dropbox.com/u/120688/gsak/nav.csv'
 SOURCE_URL = '/var/autofs/removable/sda1/cacheberrypi/nav.csv'
 # ====================================================================
 
@@ -83,7 +82,8 @@ if __name__=='__main__':
       title = s.add_string_widget("title", "Updating...")
       status = s.add_hbar_widget("status",x=1,y=2,length=0)
       GeocacheLoader(DBFILE, SOURCE_URL).refresh(lambda x: status.set_length(x))
-      time.sleep(10)
+      title.set_text("Completed...")
+      time.sleep(15)
       sys.exit()
     time.sleep(15)
 

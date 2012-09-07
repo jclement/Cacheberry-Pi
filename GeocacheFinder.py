@@ -9,6 +9,13 @@ import unicodedata
 import time
 import gps
 
+def isAngleWithin(a1, a2, threshold):
+  a_min = min(a1, a2)
+  a_max = max(a1, a2)
+  if (a_max-a_min) > threshold:
+    return ((a_min+360) - a_max) <= threshold
+  return (a_max - a_min) <= threshold
+
 def calculateBearing(start, target):
   lat1, lon1 = map(math.radians, start)
   lat2, lon2 = map(math.radians, target)
@@ -23,17 +30,16 @@ def humanizeBearing(bearing):
   symbols = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW']
   step = 360.0 / len(symbols) 
   for i in range(len(symbols)):
-    min = (i*step - .5*step) % 360
-    max = (i*step + .5*step) % 360
-    if bearing > min and bearing <= max:
-        return symbols[i]
+    if isAngleWithin(i*step, bearing, step/2):
+      return symbols[i]
 
 class CacheDatabase:
-  def __init__(self, dbfile, searchRadius, closeRadius, bearingError):
+  def __init__(self, dbfile, searchRadius, closeRadius, bearingError, minSpeed):
     self.__conn = db.connect(dbfile)
     self.__searchRadius = searchRadius
     self.__closeRadius = closeRadius
     self.__bearingError = bearingError
+    self.__minSpeed = minSpeed
   
   def findNearest(self, lat, lon, bearing, speed):
     cur = self.__conn.cursor()
@@ -79,15 +85,13 @@ class CacheDatabase:
   
     # if we aren't moving return the first cache since bearing would
     # be useless.
-    if speed < 5:
+    if speed < self.__minSpeed:
       print "low speed.  using full search radius"
       return data[0]
 
     # sift through caches looking for closest one within our travel path
     for row in data:
-      minBearing = (bearing - self.__bearingError) % 360
-      maxBearing = (bearing + self.__bearingError) % 360
-      if row['bearing'] >= minBearing and row['bearing'] <= maxBearing:
+      if isAngleWithin(bearing, row['bearing'], self.__bearingError):
         return row
 
     return None
@@ -153,7 +157,7 @@ def main(db):
       s.set_priority("hidden")
 
 if __name__=='__main__':
-  db = CacheDatabase('db.sqlite', 3500, 100, 10)
+  db = CacheDatabase('db.sqlite', 3500, 100, 10, 2)
   main(db)
 
     

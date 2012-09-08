@@ -8,6 +8,7 @@ from lcdproc.server import Server
 import unicodedata
 import time
 import gps
+import RPi.GPIO as GPIO
 
 def isAngleWithin(a1, a2, threshold):
   a_min = min(a1, a2)
@@ -100,6 +101,10 @@ def main(db):
   print "GeocacheFinder Starting..." 
   gps_session = gps.gps(mode=gps.WATCH_ENABLE)
 
+  GPIO.setmode(GPIO.BOARD)
+  GPIO.setup(22, GPIO.OUT)
+  GPIO.output(22, GPIO.LOW)
+
   lcd = Server()
   lcd.start_session()
 
@@ -121,6 +126,7 @@ def main(db):
   lat, lon = (0,0)
   bearing = 0
   speed = 0
+  ledState = GPIO.LOW
 
   while 1:
     # process all waiting GPS updates
@@ -152,6 +158,14 @@ def main(db):
         dist.set_text('%0.0fkm' % (closest['distance']/1000.0))
       else:
         dist.set_text('%0.0fm' % closest['distance'])
+      if closest['distance'] < 300:
+        if ledState == GPIO.HIGH:
+          ledState = GPIO.LOW
+        else:
+          ledState = GPIO.HIGH
+      else:
+        ledState = GPIO.LOW
+      GPIO.output(22, ledState)
       bearing_widget.set_text(closest['human_bearing'])
     else:
       s.set_priority("hidden")

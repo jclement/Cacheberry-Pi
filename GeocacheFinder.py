@@ -35,14 +35,23 @@ def humanizeBearing(bearing):
       return symbols[i]
 
 class CacheDatabase:
-  def __init__(self, dbfile, searchRadius, closeRadius, bearingError, minSpeed):
+  def __init__(self, dbfile, searchRadius, closeRadius):
     self.__conn = db.connect(dbfile)
     self.__searchRadius = searchRadius
     self.__closeRadius = closeRadius
-    self.__bearingError = bearingError
-    self.__minSpeed = minSpeed * 0.27778
   
   def findNearest(self, lat, lon, bearing, speed):
+    while 1:
+      print "searching", bearing, speed, self.__searchRadius
+      result = self.findNearest_helper(lat, lon, bearing, speed) 
+      if result:
+        self.__searchRadius = result['distance'] * 1.5
+        return result
+      else:
+        self.__searchRadius *= 2
+        print "doubling radius", self.__searchRadius
+
+  def findNearest_helper(self, lat, lon, bearing, speed):
     cur = self.__conn.cursor()
 
     # SQL to define a circle around the home point with a given radius
@@ -83,16 +92,17 @@ class CacheDatabase:
     if data[0]['distance'] < self.__closeRadius:
       print "cache within ", self.__closeRadius, "m"
       return data[0] 
-  
-    # if we aren't moving return the first cache since bearing would
-    # be useless.
-    if speed < self.__minSpeed:
-      print "low speed.  using full search radius"
-      return data[0]
+
+    # search angle varies with speed.  At low speeds we look
+    # for caches all around us while at higher speeds we look 
+    # only right in front of us.
+    if (speed < .2778 * 60): bearingError = 180
+    else: bearingError = 10
+    print ("speed", speed, bearingError)
 
     # sift through caches looking for closest one within our travel path
     for row in data:
-      if isAngleWithin(bearing, row['bearing'], self.__bearingError):
+      if isAngleWithin(bearing, row['bearing'], bearingError):
         return row
 
     return None
@@ -151,7 +161,7 @@ def main(db):
 
     if closest:
       print closest['code'], closest['distance'], closest['bearing'], closest['lat'], closest['lon']
-      s.set_priority("info")
+      s.set_priority("foreground")
       title.set_text(closest['description'].encode('ascii'))
       code.set_text(closest['code'].encode('ascii'))
       if closest['distance'] > 1000:
@@ -171,7 +181,7 @@ def main(db):
       s.set_priority("hidden")
 
 if __name__=='__main__':
-  db = CacheDatabase('db.sqlite', 3500, 100, 10, 10)
+  db = CacheDatabase('db.sqlite', 5000, 100)
   main(db)
 
     

@@ -7,3 +7,5 @@ Download / extract LCDProc source code
 make server
 cp server/drivers/hd44780.so /usr/lib/lcdproc
 ~~~
+
+The driver was patched by Chris Rowat to work with the ElecFreaks backpack.

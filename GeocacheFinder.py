@@ -27,7 +27,7 @@ def calculateBearing(start, target):
   return (math.degrees(math.atan2(y, x))+180) % 360
 
 def humanizeBearing(bearing):
-  # symbols = ['N','NE','E','SE','S','SW','W','NW']
+  #symbols = ['N','NE','E','SE','S','SW','W','NW']
   symbols = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW']
   step = 360.0 / len(symbols) 
   for i in range(len(symbols)):
@@ -45,10 +45,13 @@ class CacheDatabase:
       print "searching", bearing, speed, self.__searchRadius
       result = self.findNearest_helper(lat, lon, bearing, speed) 
       if result:
-        self.__searchRadius = result['distance'] * 1.5
+        self.__searchRadius = result['distance'] * 2;
         return result
       else:
         self.__searchRadius *= 2
+        if self.__searchRadius > 20000: 
+          self.__searchRadius = 20000
+          return None
         print "doubling radius", self.__searchRadius
 
   def findNearest_helper(self, lat, lon, bearing, speed):
@@ -93,16 +96,14 @@ class CacheDatabase:
       print "cache within ", self.__closeRadius, "m"
       return data[0] 
 
-    # search angle varies with speed.  At low speeds we look
-    # for caches all around us while at higher speeds we look 
     # only right in front of us.
-    if (speed < .2778 * 60): bearingError = 180
-    else: bearingError = 10
-    print ("speed", speed, bearingError)
+    if (speed < .2778 * 60): 
+      print "slow speed", (speed / .2778), "km/h"
+      return data[0]
 
     # sift through caches looking for closest one within our travel path
     for row in data:
-      if isAngleWithin(bearing, row['bearing'], bearingError):
+      if isAngleWithin(bearing, row['bearing'], 15):
         return row
 
     return None
@@ -128,10 +129,11 @@ def main(db):
   lat_widget = sl.add_string_widget("lat","", y=1)
   lon_widget = sl.add_string_widget("lon","", y=2)
 
-  title = s.add_scroller_widget("title",1,1,16,1,"h",1,"" )
+  title = s.add_scroller_widget("title",1,1,12,1,"h",1,"" )
   code = s.add_string_widget("code", "", y=2)
   dist = s.add_string_widget("dist", "", y=2, x=9)
   bearing_widget = s.add_string_widget("bearing", "", y=2, x=14)
+  mybearing_widget = s.add_string_widget("mybearing", "", y=1, x=14)
 
   lat, lon = (0,0)
   bearing = 0
@@ -145,6 +147,7 @@ def main(db):
       if gpsinfo["class"] == 'TPV':
         if 'track' in gpsinfo.keys():
           bearing = gpsinfo.track
+          mybearing_widget.set_text(humanizeBearing(bearing))
         if 'lat' in gpsinfo.keys():
           lat = gpsinfo.lat
         if 'lon' in gpsinfo.keys():
@@ -159,6 +162,12 @@ def main(db):
     # find closest cache based on lat, lon, and bearing/speed
     closest = db.findNearest(lat, lon, bearing, speed)
 
+    if ledState == GPIO.HIGH:
+      ledState = GPIO.LOW
+    else:
+      ledState = GPIO.HIGH
+    GPIO.output(22, ledState)
+
     if closest:
       print closest['code'], closest['distance'], closest['bearing'], closest['lat'], closest['lon']
       s.set_priority("foreground")
@@ -168,14 +177,14 @@ def main(db):
         dist.set_text('%0.0fkm' % (closest['distance']/1000.0))
       else:
         dist.set_text('%0.0fm' % closest['distance'])
-      if closest['distance'] < 300:
-        if ledState == GPIO.HIGH:
-          ledState = GPIO.LOW
-        else:
-          ledState = GPIO.HIGH
-      else:
-        ledState = GPIO.LOW
-      GPIO.output(22, ledState)
+      #if closest['distance'] < 300:
+      #  if ledState == GPIO.HIGH:
+      #    ledState = GPIO.LOW
+      #  else:
+      #    ledState = GPIO.HIGH
+      #else:
+      #  ledState = GPIO.LOW
+      #GPIO.output(22, ledState)
       bearing_widget.set_text(closest['human_bearing'])
     else:
       s.set_priority("hidden")

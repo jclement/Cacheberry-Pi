@@ -87,7 +87,8 @@ if __name__=='__main__':
       GeocacheLoader(DBFILE, SOURCE_URL).refresh(lambda x: status.set_length(x))
       title.set_text("Moving Tracks...")
       files = glob.glob("tracks/*.archived")
-      os.mkdir(TRACKS_PATH)
+      if not os.path.isdir(TRACKS_PATH):
+        os.mkdir(TRACKS_PATH)
       status.set_length(0)
       cnt = 0
       for file in files:

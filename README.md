@@ -20,6 +20,7 @@ See an overview [Video on YouTube](http://youtu.be/bwD6K2EeeV8)
 * 12V USB Charger + MicroUSB cable
 
 # Software Requirements #
+* Python 2.7
 * [GPsd](http://www.catb.org/gpsd/) - Available through APT
 * [PySpatialite](http://code.google.com/p/pyspatialite/) - Available through APT
 * [LCDProc] (http://www.lcdproc.org/) - Available through APT (required custom display driver)                                                      

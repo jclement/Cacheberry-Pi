@@ -5,7 +5,7 @@ Cacheberry Pi is a geocaching assistant built upon the Raspberry Pi platform.
 
 It's intended to be a permanent fixture in the car and alert you of nearby caches (when stopped) or along your route (when driving).  The intent is not to replace your handheld GPSr but to complement it. 
 
-See an overview [Video on YouTube](http://youtu.be/bwD6K2EeeV8)
+See an overview [Video on YouTube](http://youtu.be/bwD6K2EeeV8) or view the [project homepage](http://jclement.ca/cacheberry-pi/).
 # Features #
 * Smart Search: depending on speed and direction of travel
 * Ability to maintain a database of 20k+ geocaches

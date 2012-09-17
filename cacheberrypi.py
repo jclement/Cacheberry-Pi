@@ -8,12 +8,16 @@ from lib.ledhandler import LedHandler, LED_ON, LED_OFF
 from lib.gpshandler import GpsHandler
 from lib.geocachefinder import GeocacheFinder
 from lib.geocachedisplay import GeocacheDisplay
+from lib.geocacheloader import GeocacheLoader
+import lib.databaseinit
 from pyspatialite import dbapi2 as spatialite
 
 ## CONFIGURATION ##########################################################
+GEOCACHE_SOURCE = '/var/autofs/removable/sda1/cacheberrypi/nav.csv'
 DATABASE_FILENAME = 'geocaches.sqlite'
-LED_PINS = [22]
-LED_SEARCH_STATUS = 0
+LED_PINS = [16,18,22] #GPIO23,24,25
+LED_SEARCH_STATUS = 2
+LED_CLOSE = 1
 ###########################################################################
 
 def mainloop(led, gps, finder, geocache_display):
@@ -36,22 +40,43 @@ def mainloop(led, gps, finder, geocache_display):
           gislib.humanizeBearing(gislib.calculateBearing(gps_state['p'], closest['position'])),
           distance
           )
+
       geocache_display.show(distance < 1000)  #if within 1km show in foreground (on top)
+
+      # blink close light if we are not moving and within 100m or if we are moving and
+      # our ETA is within 45 seconds.
+      if (gps_state['s'] < 10 and distance < 100) or \
+        (gps_state['s'] >= 10 and (float(distance)/gps_state['s']) < 45):
+        led.toggle(LED_CLOSE)
+      else:
+        led.set(LED_CLOSE, LED_ON)
+
     else:
       geocache_display.hide()
+
+    time.sleep(.5)
+
+def t(a):
+  print a
   
 if __name__=='__main__':
+
+  if not os.path.exists(DATABASE_FILENAME):
+    lib.databaseinit.create(DATABASE_FILENAME)
 
   led = LedHandler(LED_PINS)
 
   gps = GpsHandler()
   gps.start()
 
-  db = spatialite.connect(DATABASE_FILENAME)
-
   finder = GeocacheFinder(DATABASE_FILENAME, lambda: led.toggle(LED_SEARCH_STATUS))
   finder.start()
 
   geocache_display = GeocacheDisplay()
+
+  loader = GeocacheLoader(DATABASE_FILENAME, GEOCACHE_SOURCE, 
+      lambda: finder.pause(),
+      lambda: finder.unpause())
+  loader.start()
 
   mainloop(led, gps, finder, geocache_display)

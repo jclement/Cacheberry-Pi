@@ -21,6 +21,13 @@ class GeocacheFinder(Thread):
     self.__database_file = database_file
     self.__radius = STARTING_SEARCH_RADIUS
     self.__ping_func = ping_func
+    self.__paused = False
+
+  def pause(self):
+    self.__paused = True
+
+  def unpause(self):
+    self.__paused = False
 
   def update_speed(self, speed): #m/s
     self.__speed = speed
@@ -37,6 +44,7 @@ class GeocacheFinder(Thread):
   def run(self):
     db = spatialite.connect(self.__database_file)
     while 1:
+      while self.__paused: time.sleep(5)
       if (self.__position):
         self.__closest = self.__findNearest(db, self.__position, self.__bearing, self.__speed)
         self.__ping_func()
@@ -82,7 +90,6 @@ class GeocacheFinder(Thread):
     # sort by distance again since we aren't using the database distance
     # this should be removed if I switch back to using the Spatialite dist.
     data.sort(key=lambda x: x['distance'])
-
 
     # If first cache is within closeRadius return that 
     if data[0]['distance'] < CLOSE_RADIUS:

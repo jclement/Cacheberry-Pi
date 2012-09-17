@@ -16,6 +16,7 @@ class GpsHandler(Thread):
     self.__lock = Lock()
     self.__gps = gps.gps(mode=gps.WATCH_ENABLE)
     self.__state = {'p':None, 's':0, 'b':0, 't':None}
+    self.__has_lock = False
 
   def state(self):
     self.__lock.acquire()
@@ -28,16 +29,18 @@ class GpsHandler(Thread):
       gpsinfo = self.__gps.next()
       if gpsinfo["class"] == 'TPV':
         self.__lock.acquire()
-        if 'track' in gpsinfo.keys():
+        if 'track' in gpsinfo.keys() and self.__has_lock:
           self.__state['b'] = gpsinfo.track
-        if 'lat' in gpsinfo.keys() and 'lon' in gpsinfo.keys():
-          if gpsinfo['epx'] < MAX_ERROR_X and gpsinfo['epy'] < MAX_ERROR_Y:
-            self.__state['p'] = (gpsinfo.lat, gpsinfo.lon)
-        if 'speed' in gpsinfo.keys():
+        if 'lat' in gpsinfo.keys() and 'lon' in gpsinfo.keys() and self.__has_lock:
+          self.__state['p'] = (gpsinfo.lat, gpsinfo.lon)
+        if 'speed' in gpsinfo.keys() and self.__has_lock:
           if gpsinfo.eps < MAX_ERROR_S:
             self.__state['s'] = gpsinfo.speed
         if 'time' in gpsinfo.keys():
           self.__state['t'] = gpsinfo['time']
+        if 'epx' in gpsinfo.keys() and 'epy' in gpsinfo.keys() and 'eps' in gpsinfo.keys():
+          if gpsinfo.epx < MAX_ERROR_X and gpsinfo.epy < MAX_ERROR_Y and gpsinfo.eps < MAX_ERROR_S:
+            self.__has_lock = True
         self.__lock.release()
 
 

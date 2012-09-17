@@ -9,6 +9,7 @@ from lib.gpshandler import GpsHandler
 from lib.geocachefinder import GeocacheFinder
 from lib.geocachedisplay import GeocacheDisplay
 from lib.geocacheloader import GeocacheLoader
+from lib.dashboard import Dashboard
 import lib.databaseinit
 from pyspatialite import dbapi2 as spatialite
 
@@ -20,13 +21,23 @@ LED_SEARCH_STATUS = 2
 LED_CLOSE = 1
 ###########################################################################
 
-def mainloop(led, gps, finder, geocache_display):
+def mainloop(led, gps, finder, geocache_display, dashboard):
   while 1:
     # grab current state from GPS and update finder location
     gps_state = gps.state()
     finder.update_position(gps_state['p'])
     finder.update_speed(gps_state['s'])
     finder.update_bearing(gps_state['b'])
+
+    try:
+      clock = time.strptime(gps_state['t'], '%Y-%m-%dT%H:%M:%S.000Z')
+    except:
+      clock = None
+
+    dashboard.update(
+        clock,
+        gps_state['s'], 
+        gislib.humanizeBearing(gps_state['b']))
 
     # grab current closest cache 
     closest = finder.closest()
@@ -79,4 +90,6 @@ if __name__=='__main__':
       lambda: finder.unpause())
   loader.start()
 
-  mainloop(led, gps, finder, geocache_display)
+  dashboard = Dashboard()
+
+  mainloop(led, gps, finder, geocache_display, dashboard)

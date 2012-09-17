@@ -2,8 +2,9 @@
 # http://www.zachary.com/blog/2005/01/12/python_zipcode_geo-programming
 # http://williams.best.vwh.net/avform.htm
 #
+# Additions by Jeff Clement
 
-from math import sin,cos,atan,acos,asin,atan2,sqrt,pi, modf
+from math import sin,cos,atan,acos,asin,atan2,sqrt,pi, modf, radians,degrees
 
 # At the equator / on another great circle???
 nauticalMilePerLat = 60.00721
@@ -96,3 +97,30 @@ def isWithinDistance(origin, loc, distance):
       return True
    else:
       return False
+
+def isAngleWithin(a1, a2, threshold):
+  "determine if two angles are within {threshold} degrees of each other"
+  a_min = min(a1, a2)
+  a_max = max(a1, a2)
+  if (a_max-a_min) > threshold:
+    return ((a_min+360) - a_max) <= threshold
+  return (a_max - a_min) <= threshold
+
+def calculateBearing(start, target):
+  "calculate a bearing in degrees (N=0 deg) from start to target point"
+  lat1, lon1 = map(radians, start)
+  lat2, lon2 = map(radians, target)
+  dLon = lon2-lon1
+  y = sin(dLon) * cos(lat2)
+  x = cos(lat1)*sin(lat2) - \
+      sin(lat1)*cos(lat2)*cos(dLon)
+  return (degrees(atan2(y, x))+180) % 360
+
+def humanizeBearing(bearing):
+  "convert a bearing in degrees to a human readable version"
+  #symbols = ['N','NE','E','SE','S','SW','W','NW']
+  symbols = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW']
+  step = 360.0 / len(symbols) 
+  for i in range(len(symbols)):
+    if isAngleWithin(i*step, bearing, step/2):
+      return symbols[i]

@@ -5,9 +5,9 @@ from threading import Thread, Lock
 import gps
 import copy
 
-MAX_ERROR_X = 10
-MAX_ERROR_Y = 10
-MAX_ERROR_S = 10
+MAX_ERROR_X = 30
+MAX_ERROR_Y = 30
+MAX_ERROR_S = 30
 
 class GpsHandler(Thread):
   def __init__(self):
@@ -31,14 +31,13 @@ class GpsHandler(Thread):
         if 'track' in gpsinfo.keys():
           self.__state['b'] = gpsinfo.track
         if 'lat' in gpsinfo.keys() and 'lon' in gpsinfo.keys():
-          if gpsinfo.epx < MAX_ERROR_X and gpsinfo.epy < MAX_ERROR_Y:
+          if gpsinfo['epx'] < MAX_ERROR_X and gpsinfo['epy'] < MAX_ERROR_Y:
             self.__state['p'] = (gpsinfo.lat, gpsinfo.lon)
         if 'speed' in gpsinfo.keys():
           if gpsinfo.eps < MAX_ERROR_S:
             self.__state['s'] = gpsinfo.speed
         if 'time' in gpsinfo.keys():
           self.__state['t'] = gpsinfo['time']
-        print "update"
         self.__lock.release()
 
 

@@ -66,9 +66,6 @@ def mainloop(led, gps, finder, geocache_display, dashboard):
       geocache_display.hide()
 
     time.sleep(.5)
-
-def t(a):
-  print a
   
 if __name__=='__main__':
 

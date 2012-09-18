@@ -36,5 +36,5 @@ class GeocacheDisplay:
     if foreground:
       self.__screen.set_priority("foreground")
     else:
-      seld.__screen.set_priority("info")
+      self.__screen.set_priority("info")
 

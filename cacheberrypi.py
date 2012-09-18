@@ -47,7 +47,7 @@ def mainloop(led, gps, finder, geocache_display, dashboard):
       geocache_display.update(
           closest["description"],
           closest["code"],
-          gislib.humanizeBearing(gps_state['b']),
+          gislib.humanizeBearing(gps_state['b']) if gps_state['s'] > 2 else '',
           gislib.humanizeBearing(gislib.calculateBearing(gps_state['p'], closest['position'])),
           distance
           )

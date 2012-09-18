@@ -59,6 +59,7 @@ $ sudo wget http://pypi.python.org/packages/source/l/lcdproc/lcdproc-0.03.tar.gz
 $ sudo tar -xzf lcdproc-0.03.tar.gz
 $ cd lcdproc-0.03/
 $ sudo python setup.py install
+~~~
 
 ## Download CacheberryPi Software ##
 

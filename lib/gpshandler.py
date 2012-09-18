@@ -5,6 +5,7 @@ from threading import Thread, Lock
 import gps
 import copy
 import time
+import fcntl
 
 MAX_ERROR_X = 30
 MAX_ERROR_Y = 30
@@ -34,6 +35,7 @@ class GpsHandler(Thread):
     if not self.__track_file:
       if g['t']:
         self.__track_file = open(os.path.join(self.__track_folder, g["t"].replace(":","_")+'.csv'), 'w')
+        fcntl.flock(self.__track_file, fcntl.LOCK_EX)
         self.__track_file.write('date,time,lat,lon,speed\n')
     if self.__track_file and self.__has_lock and g['p']:
       clock = time.strptime(g['t'], '%Y-%m-%dT%H:%M:%S.000Z')

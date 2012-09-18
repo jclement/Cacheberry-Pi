@@ -19,6 +19,8 @@ class GpsHandler(Thread):
     self.__has_lock = False
     self.__track_folder = track_folder
     self.__track_file = None
+    if not os.path.exists(track_folder):
+      os.mkdir(track_folder)
 
   def state(self):
     self.__lock.acquire()
@@ -30,9 +32,9 @@ class GpsHandler(Thread):
     g = self.state()
     if not self.__track_file:
       if g['t']:
-        self.__track_file = open(os.path.join(track_folder, g[t]+'.csv'), 'w')
+        self.__track_file = open(os.path.join(self.__track_folder, g[t]+'.csv'), 'w')
         self.__track_file.write('date,time,lat,lon,speed')
-    if self.__track_file && self.__has_lock:
+    if self.__track_file and self.__has_lock:
       clock = time.strptime(g['t'], '%Y-%m-%dT%H:%M:%S.000Z')
       self.__track_file.write('%s,%s,%s,%s,%s\n' % (
         time.strftime('%Y/%m/%d', clock),

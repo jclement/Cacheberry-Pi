@@ -74,7 +74,7 @@ if __name__=='__main__':
 
   led = LedHandler(LED_PINS)
 
-  gps = GpsHandler()
+  gps = GpsHandler("tracks")
   gps.start()
 
   finder = GeocacheFinder(DATABASE_FILENAME, lambda: led.toggle(LED_SEARCH_STATUS))

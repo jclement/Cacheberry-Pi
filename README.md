@@ -76,8 +76,8 @@ Install the ifup script so we can see network configuration on the LCD.
 
 ~~~
 $ cd ~/Cacheberry-Pi/utils
-$ sudo cp ifup-lcdproc.py /etc/network/if-up.d
-$ sudo chmod 755 /etc/network/if-up.d/ifup-lcdproc.py
+$ sudo cp ifup-lcdproc /etc/network/if-up.d
+$ sudo chmod 755 /etc/network/if-up.d/ifup-lcdproc
 ~~~
 
 Install lcdproc configuration files and LCD driver.

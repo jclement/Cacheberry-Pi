@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+# INSTALLATION ################################################################
+# Just drop into /etc/network/ifup.d
+# Make sure it's marked as executable. (ie. chmod 755 ifup-lcdproc.py)
+###############################################################################
+
 import os
 import sys
 import time

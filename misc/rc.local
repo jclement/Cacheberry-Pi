@@ -17,6 +17,6 @@ if [ "$_IP" ]; then
   printf "My IP address is %s\n" "$_IP"
 fi
 
-nohup /home/jsc/code/Cacheberry-Pi/start &
+nohup /home/pi/Cacheberry-Pi/start &
 
 exit 0

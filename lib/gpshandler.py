@@ -10,19 +10,38 @@ MAX_ERROR_Y = 30
 MAX_ERROR_S = 30
 
 class GpsHandler(Thread):
-  def __init__(self):
+  def __init__(self, track_folder):
     Thread.__init__(self)
     self.daemon = True
     self.__lock = Lock()
     self.__gps = gps.gps(mode=gps.WATCH_ENABLE)
     self.__state = {'p':None, 's':0, 'b':0, 't':None}
     self.__has_lock = False
+    self.__track_folder = track_folder
+    self.__track_file = None
 
   def state(self):
     self.__lock.acquire()
     state_copy = copy.copy(self.__state)
     self.__lock.release()
     return state_copy
+
+  def __update_tracklog(self):
+    g = self.state()
+    if not self.__track_file:
+      if g['t']:
+        self.__track_file = open(os.path.join(track_folder, g[t]+'.csv'), 'w')
+        self.__track_file.write('date,time,lat,lon,speed')
+    if self.__track_file && self.__has_lock:
+      clock = time.strptime(g['t'], '%Y-%m-%dT%H:%M:%S.000Z')
+      self.__track_file.write('%s,%s,%s,%s,%s\n' % (
+        time.strftime('%Y/%m/%d', clock),
+        time.strftime('%H:%M:%S', clock),
+        g['p'][0],
+        g['p'][1],
+        g['s']
+        ))
+      self.__track_file.flush()
 
   def run(self):
     while 1:
@@ -42,6 +61,8 @@ class GpsHandler(Thread):
           if gpsinfo.epx < MAX_ERROR_X and gpsinfo.epy < MAX_ERROR_Y and gpsinfo.eps < MAX_ERROR_S:
             self.__has_lock = True
         self.__lock.release()
+        self.__update_tracklog()
+
 
 
 

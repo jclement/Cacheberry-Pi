@@ -22,15 +22,13 @@ def main(interface):
 
   s = lcd.add_screen("update")
   s.set_priority("alert")
-  s.add_title_widget("title","Pulling..." % interface)
+  s.add_title_widget("title","Pulling...")
   os.chdir("/home/pi/Cacheberry-Pi")
-  os.system("git pull")
-
-  time.sleep(10)
+  os.system("sudo -u pi git pull")
 
 if __name__=='__main__':
   if os.environ.has_key('IFACE'):
     iface = os.environ['IFACE']
     if os.fork() != 0: sys.exit()
-    time.sleep(10)
+    time.sleep(20)
     main(iface)

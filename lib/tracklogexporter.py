@@ -23,7 +23,6 @@ class TracklogExporter(Thread):
   def __test_lock(self, file):
         f = open(file, 'r')
         try:
-          print file, fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
           ret = True
         except:
           ret = False
@@ -44,7 +43,6 @@ class TracklogExporter(Thread):
       position = 0
       for file in files:
         if self.__test_lock(file):
-          print position, file
           shutil.move(file, self.__tracklog_export_dir)
         self.__progress_widget.set_length((float(position)/len(files)) * (5*16))
         position = position + 1

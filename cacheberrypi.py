@@ -77,10 +77,10 @@ if __name__=='__main__':
 
   led = LedHandler(LED_PINS)
 
-  gps = GpsHandler(TRACKS_TARGET)
+  gps = GpsHandler(TRACKLOG_TARGET)
   gps.start()
 
-  tracklogexport = TracklogExporter(TRACKS_TARGET, TRACKS_EXPORT_TARGET)
+  tracklogexport = TracklogExporter(TRACKLOG_TARGET, TRACKLOG_EXPORT_TARGET)
   tracklogexport.start()
 
   finder = GeocacheFinder(DATABASE_FILENAME, lambda: led.toggle(LED_SEARCH_STATUS))

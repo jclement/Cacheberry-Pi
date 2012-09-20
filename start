@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sleep 30
+sleep 15
 cd /home/pi/Cacheberry-Pi
 sudo -u pi git pull
 python cacheberrypi.py 2>> error.log

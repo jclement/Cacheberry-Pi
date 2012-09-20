@@ -80,14 +80,6 @@ $ sudo cp ifup-lcdproc /etc/network/if-up.d
 $ sudo chmod 755 /etc/network/if-up.d/ifup-lcdproc
 ~~~
 
-Install the automatic git pullin' update script.
-
-~~~
-$ cd ~/Cacheberry-Pi/utils
-$ sudo cp update-cacheberry /etc/network/if-up.d
-$ sudo chmod 755 /etc/network/if-up.d/update-cacheberry
-~~~
-
 Install lcdproc configuration files and LCD driver.
 
 ~~~

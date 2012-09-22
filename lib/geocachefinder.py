@@ -104,7 +104,7 @@ class GeocacheFinder(Thread):
         'code': row[0],
         'description': row[1],
         'distance': int(1000.0 * gislib.getDistance(coord, (lat, lon))),
-        'bearing': gislib.calculateBearing(coord, (lat, lon)),
+        'bearing': gislib.calculateBearing((lat, lon), coord),
         'position': coord
         })
 

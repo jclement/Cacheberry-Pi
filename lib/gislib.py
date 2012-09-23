@@ -114,7 +114,7 @@ def calculateBearing(start, target):
   y = sin(dLon) * cos(lat2)
   x = cos(lat1)*sin(lat2) - \
       sin(lat1)*cos(lat2)*cos(dLon)
-  return (degrees(atan2(y, x))+180) % 360
+  return (degrees(atan2(y, x))) % 360
 
 def humanizeBearing(bearing):
   "convert a bearing in degrees to a human readable version"

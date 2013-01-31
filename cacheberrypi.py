@@ -15,9 +15,9 @@ import lib.databaseinit
 from pyspatialite import dbapi2 as spatialite
 
 ## CONFIGURATION ##########################################################
-GEOCACHE_SOURCE = '/var/autofs/removeable/sda1/cacheberrypi/nav.csv'
+GEOCACHE_SOURCE = '/var/autofs/removable/sda1/cacheberrypi/nav.csv'
 TRACKLOG_TARGET = 'tracks'
-TRACKLOG_EXPORT_TARGET = '/var/autofs/removeable/sda1/cacheberrypi/tracks/'
+TRACKLOG_EXPORT_TARGET = '/var/autofs/removable/sda1/cacheberrypi/tracks/'
 DATABASE_FILENAME = 'geocaches.sqlite'
 LED_PINS = [16,18,22] #GPIO23,24,25
 LED_SEARCH_STATUS = 2

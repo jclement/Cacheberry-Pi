@@ -14,7 +14,7 @@
 #
 # Include /etc/auto.master.d/*.autofs
 #
-/var/autofs/removable /etc/auto.removable --timeout=1
+/var/autofs/removeable /etc/auto.removeable --timeout=1
 +dir:/etc/auto.master.d
 #
 # Include central master map if it can be found using

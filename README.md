@@ -46,7 +46,7 @@ The RPi.GPIO library needs to be installed separately since it's not in APT.
 ~~~
 $ cd /usr/src
 $ sudo wget http://pypi.python.org/packages/source/R/RPi.GPIO/RPi.GPIO-0.4.1a.tar.gz#md5=9acdb66290350aaa74b99de859ded153
-$ sudo tar -xvf RPi.GPIO-0.3.1a.tar.gz
+$ sudo tar -xvf RPi.GPIO-0.4.1a.tar.gz
 $ cd RPi.GPIO-0.4.1a/
 $ sudo python setup.py install
 ~~~

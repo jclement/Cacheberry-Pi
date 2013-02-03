@@ -38,16 +38,16 @@ Most of the packages can be obtained from APT.
 ~~~
 $ sudo apt-get update
 $ sudo apt-get upgrade
-$ sudo apt-get install autofs lcdproc python-pyspatialite sqlite3 gpsd vim-nox gpsd-clients screen
+$ sudo apt-get install autofs lcdproc python-pyspatialite sqlite3 gpsd vim-nox gpsd-clients screen python-dev i2c-tools python-smbus git
 ~~~
 
 The RPi.GPIO library needs to be installed separately since it's not in APT.
 
 ~~~
 $ cd /usr/src
-$ sudo wget http://pypi.python.org/packages/source/R/RPi.GPIO/RPi.GPIO-0.3.1a.tar.gz#md5=1588ebc23872ce281b846a9f01d389af
-$ sudo tar -xvf RPi.GPIO-0.3.1a.tar.gz
-$ cd RPi.GPIO-0.3.1a/
+$ sudo wget http://pypi.python.org/packages/source/R/RPi.GPIO/RPi.GPIO-0.4.1a.tar.gz#md5=9acdb66290350aaa74b99de859ded153
+$ sudo tar -xvf RPi.GPIO-0.4.1a.tar.gz
+$ cd RPi.GPIO-0.4.1a/
 $ sudo python setup.py install
 ~~~
 
@@ -75,7 +75,7 @@ $ git clone https://github.com/jclement/Cacheberry-Pi.git
 Install the ifup script so we can see network configuration on the LCD.
 
 ~~~
-$ cd ~/Cacheberry-Pi/utils
+$ cd ~/Cacheberry-Pi/util
 $ sudo cp ifup-lcdproc /etc/network/if-up.d
 $ sudo chmod 755 /etc/network/if-up.d/ifup-lcdproc
 ~~~
@@ -94,6 +94,15 @@ Setup udev to make GPS devices world write/readable:
 $ cd ~/Cacheberry-Pi/misc
 $ sudo cp 70-persistent-net.rules  /etc/udev/rules.d/
 ~~~
+
+Edit 2 files to enable i2c: 
+In /etc/modprobe.d/raspi-blacklist.conf Add a # before the line "blacklist i2c-bcm2708".
+Add the following 2 lines in /etc/modules
+~~~
+i2c-dev
+i2c-bcm2708
+~~~
+
 
 Edit /etc/rc.local to start CacheberryPi on startup.  Add the following before "exit 0"
 
